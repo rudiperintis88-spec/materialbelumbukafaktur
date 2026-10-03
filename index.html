@@ -468,12 +468,12 @@ function buildDiv(name,items,raw,fallbackAll,pj,wh,wipRaw,dep){
   }
 
   var rows=[],flags=[];
-  W.forEach(function(g,k){rows.push([String(k+1),fdt(g.tgl),g.wo,g.sa,g.pol,g.dev,g.cust,g.typ,g.srv,g.chg,g.hari===null?'':String(g.hari),fint(g.nom)].concat(depCells(g.wo)));flags.push(false)});
+  W.forEach(function(g,k){rows.push([String(k+1),fdt(g.tgl),g.wo,g.sa,g.pol,g.dev,g.cust,g.typ,g.srv,g.chg,g.hari===null?'':String(g.hari),fint(g.nom)].concat(depCells(g.wo),[g.kets.join('; '),g.alas.join('; ')]));flags.push(false)});
   var nonp=items.filter(function(it){return it.kat==='Non PKB'}),pm={},pl=[];
-  var pmS={};
-  nonp.forEach(function(it){var k=it.nsup||(it.pol+'|'+it.nsa);if(!pm[k]){pm[k]=it;pl.push(k);pmS[k]=0}pmS[k]+=it.jum});
-  pl.forEach(function(k){var it=pm[k];rows.push([String(rows.length+1),'#N/A','',it.nsa,it.pol,it.dev,'#N/A','#N/A','#N/A','#N/A',it.hari===null?'':String(it.hari),fint(pmS[k]),'','','']);flags.push(true)});
-  sheets.push({name:'Total WO',kind:'table',heads:['No','Tgl PKB/WO','No PKB/WO','Nama SA','NoPolisi','Devisi','Nama Customer','Type',SK,'Charge To','Hari','Total Nominal','Tgl Penitipan','No.Penitipan','Total Penitipan'],rows:rows,flags:flags,sumCols:['Total Nominal','Total Penitipan'],
+  var pmS={},pmK={},pmA={};
+  nonp.forEach(function(it){var k=it.nsup||(it.pol+'|'+it.nsa);if(!pm[k]){pm[k]=it;pl.push(k);pmS[k]=0;pmK[k]=[];pmA[k]=[]}pmS[k]+=it.jum;if(it.ket&&pmK[k].indexOf(it.ket)<0)pmK[k].push(it.ket);if(it.ala&&pmA[k].indexOf(it.ala)<0)pmA[k].push(it.ala)});
+  pl.forEach(function(k){var it=pm[k];rows.push([String(rows.length+1),'#N/A','',it.nsa,it.pol,it.dev,'#N/A','#N/A','#N/A','#N/A',it.hari===null?'':String(it.hari),fint(pmS[k]),'','','',pmK[k].join('; '),pmA[k].join('; ')]);flags.push(true)});
+  sheets.push({name:'Total WO',kind:'table',heads:['No','Tgl PKB/WO','No PKB/WO','Nama SA','NoPolisi','Devisi','Nama Customer','Type',SK,'Charge To','Hari','Total Nominal','Tgl Penitipan','No.Penitipan','Total Penitipan','Keterangan','Alasan'],rows:rows,flags:flags,sumCols:['Total Nominal','Total Penitipan'],
     facts:['<li>WO unik <b>'+W.length+'</b> ditambah <b>'+pl.length+'</b> baris Non PKB tanpa WO</li>'],
     note:'Baris Non PKB: No PKB/WO kosong dan Nama Customer #N/A. Hari diambil dari kolom Hari (V) di Sheet1.',chip:'Non PKB',dateCol:1});
 
