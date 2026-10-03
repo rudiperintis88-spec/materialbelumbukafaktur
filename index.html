@@ -347,7 +347,7 @@ var FILE_ID='1r0swpSbld_Uukv-urpt8ch-Y0g0l2uCu0djwlp1a4wI', SERVER='Google Drive
 var XLSX_MIME='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 var FALLBACK={'000019/WO/PB/12/25':{tgl:'2025-12-03',srv:'Light'},'000071/WO/PB/12/25':{tgl:'2025-12-12',srv:'Light'}};
 var PRESET={'Light':0,'Medium':1,'Heavy':2};
-var NUMH={'No':1,'Jlh':1,'Harga':1,'Jumlah':1,'Rate':1,'Hari':1,'Tunai':1,'Cheque/Giro':1,'Nota Kredit':1,'Total Penitipan':1};
+var NUMH={'No':1,'Jlh':1,'Harga':1,'Jumlah':1,'Rate':1,'Hari':1,'Total Penitipan':1};
 var DATEH={'TglSupply':1,'TglWO':1,'Tgl PKB/WO':1,'TglInvoice':1,'Tgl Penitipan':1};
 var MONTHS=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 var BUCKETS=[{l:'0–30 hari',t:'ok'},{l:'31–60 hari',t:'amber'},{l:'61–90 hari',t:'orange'},{l:'> 90 hari',t:'red'}];
@@ -474,12 +474,12 @@ function buildDiv(name,items,raw,fallbackAll,pj,wh,wipRaw,dep){
     facts:['<li>WO unik <b>'+W.length+'</b> ditambah <b>'+pl.length+'</b> baris Non PKB tanpa WO</li>'],
     note:'Baris Non PKB: No PKB/WO kosong dan Nama Customer #N/A. Hari diambil dari kolom Hari (V) di Sheet1.',chip:'Non PKB',dateCol:1});
 
-  var H=['No',SK,'TglSupply','NoSupply','No PKB/WO','KodeBrg','Nama Barang','Jlh','Harga','Jumlah','Nama SA','NoPolisi','Devisi','Nama Customer','Type','Charge To','TglWO','Hari','Tgl Penitipan','No.Penitipan','Tunai','Cheque/Giro','Nota Kredit','Total Penitipan','Keterangan','Alasan'];
+  var H=['No',SK,'TglSupply','NoSupply','No PKB/WO','KodeBrg','Nama Barang','Jlh','Harga','Jumlah','Nama SA','NoPolisi','Devisi','Nama Customer','Type','Charge To','TglWO','Hari','Tgl Penitipan','No.Penitipan','Total Penitipan','Keterangan','Alasan'];
   var q=items.slice().sort(function(a,b){
     var oa=rank(a.kat),ob=rank(b.kat);
     return (oa-ob)||cmpNullLast(a.two,b.two)||cmpNullLast(a.wo,b.wo)||cmpNullLast(a.tsup,b.tsup)||cmpNullLast(a.nsup,b.nsup);
   });
-  var depCells=function(w){var e=w&&dep&&dep[w];return e?[e.dates,e.nos,fint(e.tn),fint(e.gr),fint(e.nk),fint(e.to)]:['','','','','',''];};
+  var depCells=function(w){var e=w&&dep&&dep[w];return e?[e.dates,e.nos,fint(e.to)]:['','',''];};
   var rr=[],nums=[],fl=[],fbn=Object.keys(fallbackUsed);
   q.forEach(function(it,k){
     var n=it.kat==='Non PKB';
