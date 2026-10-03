@@ -351,7 +351,7 @@ var NUMH={'No':1,'Jlh':1,'Harga':1,'Jumlah':1,'Rate':1,'Hari':1,'Total Penitipan
 var DATEH={'TglSupply':1,'TglWO':1,'Tgl PKB/WO':1,'TglInvoice':1,'Tgl Penitipan':1};
 var MONTHS=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 var BUCKETS=[{l:'0–30 hari',t:'ok'},{l:'31–60 hari',t:'amber'},{l:'61–90 hari',t:'orange'},{l:'> 90 hari',t:'red'}];
-var SK='Service Kategori',DETAIL='Detail Laporan',CARDS='Kartu Ringkasan';
+var SK='Service Kategori',DETAIL='Detail Laporan',CARDS='Kartu Ringkasan',RECAP='Rekapan PKB/WO';
 
 function emp(v){return v===null||v===undefined||v===''||v==='#N/A'}
 function str(v){return emp(v)?'':String(v)}
@@ -473,7 +473,7 @@ function buildDiv(name,items,raw,fallbackAll,pj,wh,wipRaw,dep){
   var pmS={},pmK={},pmA={};
   nonp.forEach(function(it){var k=it.nsup||(it.pol+'|'+it.nsa);if(!pm[k]){pm[k]=it;pl.push(k);pmS[k]=0;pmK[k]=[];pmA[k]=[]}pmS[k]+=it.jum;if(it.ket&&pmK[k].indexOf(it.ket)<0)pmK[k].push(it.ket);if(it.ala&&pmA[k].indexOf(it.ala)<0)pmA[k].push(it.ala)});
   pl.forEach(function(k){var it=pm[k];rows.push([String(rows.length+1),'#N/A','',it.nsa,it.pol,it.dev,'#N/A','#N/A','#N/A','#N/A',it.hari===null?'':String(it.hari),fint(pmS[k]),'','','',pmK[k].join('; '),pmA[k].join('; ')]);flags.push(true)});
-  sheets.push({name:'Total WO',kind:'table',heads:['No','Tgl PKB/WO','No PKB/WO','Nama SA','NoPolisi','Devisi','Nama Customer','Type',SK,'Charge To','Hari','Total Nominal','Tgl Penitipan','No.Penitipan','Total Penitipan','Keterangan','Alasan'],rows:rows,flags:flags,sumCols:['Total Nominal','Total Penitipan'],
+  sheets.push({name:RECAP,kind:'table',heads:['No','Tgl PKB/WO','No PKB/WO','Nama SA','NoPolisi','Devisi','Nama Customer','Type',SK,'Charge To','Hari','Total Nominal','Tgl Penitipan','No.Penitipan','Total Penitipan','Keterangan','Alasan'],rows:rows,flags:flags,sumCols:['Total Nominal','Total Penitipan'],
     facts:['<li>WO unik <b>'+W.length+'</b> ditambah <b>'+pl.length+'</b> baris Non PKB tanpa WO</li>'],
     note:'Baris Non PKB: No PKB/WO kosong dan Nama Customer #N/A. Hari diambil dari kolom Hari (V) di Sheet1.',chip:'Non PKB',dateCol:1});
 
@@ -988,6 +988,7 @@ function fileBase(tabName){
   var d=(model.repISO||'').replace(/-/g,'');
   return 'Material-Belum-Faktur_'+slug(curDiv)+'_'+slug(tabName)+(d?'_'+d:'');
 }
+function exportTitle(dv){return 'Laporan Material Belum Faktur '+dv.name}
 function nowStr(){var d=new Date();return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())}
 function perText(){return model.marker||('Per : '+fdt(model.repISO))}
 /* angka dan tanggal dari teks tampilan */
@@ -1063,8 +1064,8 @@ function cardsExport(){
   return {name:CARDS,heads:heads,disp:disp,cells:cells,types:types,flags:disp.map(function(){return false}),grand:null,count:disp.length,filter:'',boldRows:bold};
 }
 /* ---- Excel ---- */
-function excelSheet(exp,title){
-  var aoa=[['PT Perintis Perkasa, Medan'],[title],[perText()+'   |   Diunduh: '+nowStr()]];
+function excelSheet(exp,title,tabName){
+  var aoa=[['PT Perintis Perkasa, Medan'],[title],['Tab: '+tabName+'   |   '+perText()+'   |   Diunduh: '+nowStr()]];
   if(exp.filter)aoa.push([exp.filter]);
   aoa.push([]);
   var hr=aoa.length;
@@ -1122,8 +1123,7 @@ function exportExcel(mode){
     var exp=exportOf(it.s,it.filtered);
     if(!exp.count)return;
     total+=exp.count;
-    var title='Laporan Material Belum Dibuka Faktur - '+dv.name+' - '+it.s.name;
-    XLSX.utils.book_append_sheet(wb,excelSheet(exp,title),sheetName(it.s.name,used));
+    XLSX.utils.book_append_sheet(wb,excelSheet(exp,exportTitle(dv),it.s.name),sheetName(it.s.name,used));
     if(exp.filter)note=' (sesuai filter)';
   });
   if(!wb.SheetNames.length)return Promise.reject({code:'kosong',message:'Tidak ada data untuk diekspor di tab ini.'});
@@ -1142,9 +1142,9 @@ function exportPdf(){
     var W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight(),M=10;
     var fs=s.kind==='cards'?7.5:(n<=8?9:n<=11?8:n<=14?7:n<=17?6.5:6);
     doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(106,111,128);doc.text('PT Perintis Perkasa, Medan',M,10);
-    doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(20,22,31);doc.text(pdfText('Laporan Material Belum Dibuka Faktur'),M,17);
+    doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(20,22,31);doc.text(pdfText(exportTitle(dv)),M,17);
     doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(60,64,80);
-    doc.text(pdfText(dv.name+'  |  Tab: '+s.name+'  |  '+perText()),M,23);
+    doc.text(pdfText('Tab: '+s.name+'  |  '+perText()),M,23);
     var y=28;
     var info=fint(exp.count)+' baris'+(exp.grand?('  |  Qty '+fint(exp.grand.qty)+'  |  Jumlah Rp '+fint(exp.grand.val)):'');
     doc.setFontSize(8.5);doc.setTextColor(106,111,128);doc.text(pdfText(info),M,y);y+=4.5;
@@ -1174,7 +1174,7 @@ function exportPdf(){
     var pages=doc.getNumberOfPages();
     for(var p=1;p<=pages;p++){
       doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(106,111,128);
-      if(p>1)doc.text(pdfText('Material Belum Dibuka Faktur - '+dv.name+' - '+s.name),M,8);
+      if(p>1)doc.text(pdfText(exportTitle(dv)+' - '+s.name),M,8);
       doc.text('Diunduh '+nowStr(),M,H-6);
       doc.text('Halaman '+p+' dari '+pages,W-M,H-6,{align:'right'});
     }
