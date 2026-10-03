@@ -45,7 +45,7 @@ body{margin:0;min-height:100%;color:var(--ink);font-family:Inter,system-ui,-appl
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 [hidden]{display:none!important}
 button,select,input{font:inherit;color:var(--ink)}
-.page{max-width:1500px;margin:0 auto calc(66px + env(safe-area-inset-bottom,0px));padding:28px 44px 36px}
+.page{max-width:1500px;margin:0 auto;padding:28px 44px 36px}
 .serif{font-family:Fraunces,Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:-.015em}
 .mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 
@@ -77,14 +77,12 @@ button,select,input{font:inherit;color:var(--ink)}
 .source{grid-area:source;justify-self:end;color:var(--muted);font-size:14.5px;text-align:right}
 .detail{grid-area:detail;justify-self:end;color:var(--muted);font-size:12.5px;text-align:right;max-width:560px;margin-top:6px}
 .detail:empty{display:none}
-.divtabs{position:fixed;left:0;right:0;bottom:0;z-index:35;display:flex;justify-content:flex-start;gap:0;margin:0;background:var(--card);border-top:1px solid var(--line2);box-shadow:0 -8px 22px rgba(20,22,31,.10);padding:0 12px env(safe-area-inset-bottom,0px);overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.divtabs{display:flex;gap:0;margin-top:16px;border-bottom:1px solid var(--line);overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
 .divtabs::-webkit-scrollbar{display:none}
-.divtabs button{all:unset;box-sizing:border-box;flex:1 1 0;min-width:140px;max-width:380px;text-align:center;padding:13px 16px 12px;cursor:pointer;font-weight:600;font-size:16px;line-height:1.25;color:var(--muted);border-top:3px solid transparent;white-space:nowrap}
-.divtabs button:first-child{margin-left:auto}
-.divtabs button:last-child{margin-right:auto}
+.divtabs button{all:unset;box-sizing:border-box;flex:1 0 auto;min-width:150px;text-align:center;padding:14px 18px 12px;cursor:pointer;font-weight:600;font-size:16px;line-height:1.25;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
 .divtabs button:hover{color:var(--ink)}
 .divtabs button:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
-.divtabs button[aria-selected="true"]{color:var(--ink);border-top-color:var(--accent)}
+.divtabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 .divtabs button small{display:inline-block;margin-left:8px;font-size:12px;font-weight:600;color:var(--muted);background:var(--thbg);border-radius:999px;padding:1px 8px}
 .divtabs button[aria-selected="true"] small{background:var(--accent-soft);color:var(--accent)}
 .detail{color:var(--muted);font-size:12.5px;text-align:right;max-width:560px}
@@ -92,7 +90,7 @@ button,select,input{font:inherit;color:var(--ink)}
 
 /* ringkasan */
 .summary{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:32px;margin-top:28px}
-.hero{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:40px 44px;box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:center;min-height:300px}
+.hero{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:40px 44px;box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:center;min-height:345px}
 .hero .lab{color:var(--muted);font-size:16px}
 .hero .big{font-size:clamp(34px,5.2vw,62px);line-height:1.05;margin:18px 0 14px;letter-spacing:-.01em;word-break:break-word}
 .hero .sub{color:var(--muted);font-size:15px}
@@ -173,7 +171,7 @@ nav.subtabs button[aria-selected="true"] small{color:var(--accent)}
 .fhead .fin{will-change:transform}
 .fhead table{table-layout:fixed;min-width:0}
 .grid{overflow-x:auto;overflow-y:hidden;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
-.jump{position:fixed;right:20px;bottom:calc(80px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;z-index:30}
+.jump{position:fixed;right:20px;bottom:calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;z-index:30}
 .jump button{width:42px;height:42px;border-radius:50%;border:1px solid var(--line2);background:var(--card);cursor:pointer;display:grid;place-items:center;box-shadow:0 2px 8px rgba(20,22,31,.18)}
 .jump button:disabled{opacity:.35;cursor:default}
 .jump button:hover:not(:disabled){border-color:var(--accent)}
@@ -225,7 +223,7 @@ tr.total td{background:var(--mark);color:var(--markink);font-weight:700;border-t
 .dk .late .kv{color:var(--red)}
 .dk em{font-style:normal;color:var(--muted);font-size:12.5px;grid-column:2}
 .empty{padding:48px 24px;text-align:center;color:var(--muted)}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(80px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;font-weight:600;box-shadow:0 4px 18px rgba(0,0,0,.3);z-index:20;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;font-weight:600;box-shadow:0 4px 18px rgba(0,0,0,.3);z-index:20;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.show{opacity:1}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 /* layar sempit: di bawah 1180px tampilan disesuaikan untuk tablet dan HP */
@@ -240,8 +238,7 @@ tr.total td{background:var(--mark);color:var(--markink);font-weight:700;border-t
   .live{font-size:13.5px}
   .source{justify-self:start;text-align:left;font-size:13.5px;margin-top:8px}
   .detail{justify-self:start;text-align:left}
-  .divtabs{padding-left:4px;padding-right:4px}
-  .divtabs button{flex:1 0 auto;min-width:0;padding:11px 14px 10px;font-size:14.5px}
+  .divtabs button{min-width:0;padding:12px 14px 10px;font-size:14.5px}
   .summary{grid-template-columns:1fr;gap:14px;margin-top:18px}
   .hero{padding:22px 20px;min-height:0;border-radius:16px}
   .hero .lab{font-size:14px}
@@ -305,6 +302,7 @@ tr.total td{background:var(--mark);color:var(--markink);font-weight:700;border-t
     <h2 class="serif">Material</h2>
     <span class="cap mono">per service kategori · per WO</span>
   </div>
+  <nav class="divtabs" id="divtabs" role="tablist" aria-label="Divisi"></nav>
   <div class="tabrow">
     <nav class="subtabs" id="tabs" role="tablist" aria-label="Sheet"></nav>
     <div class="export" role="group" aria-label="Ekspor data">
@@ -334,7 +332,6 @@ tr.total td{background:var(--mark);color:var(--markink);font-weight:700;border-t
     <div class="grid" id="grid" tabindex="0" role="tabpanel" aria-label="Isi sheet"></div>
   </div>
 </div>
-<nav class="divtabs" id="divtabs" role="tablist" aria-label="Divisi"></nav>
 <div class="fhead" id="fhead" aria-hidden="true"></div>
 <div class="jump">
       <button id="up" type="button" aria-label="Naik ke baris paling atas" title="Naik ke paling atas"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/><path d="M6 20h12"/></svg></button>
@@ -354,7 +351,7 @@ var NUMH={'No':1,'Jlh':1,'Harga':1,'Jumlah':1,'Rate':1,'Hari':1,'Total Penitipan
 var DATEH={'TglSupply':1,'TglWO':1,'Tgl PKB/WO':1,'TglInvoice':1,'Tgl Penitipan':1};
 var MONTHS=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 var BUCKETS=[{l:'0–30 hari',t:'ok'},{l:'31–60 hari',t:'amber'},{l:'61–90 hari',t:'orange'},{l:'> 90 hari',t:'red'}];
-var SK='Service Kategori',DETAIL='Detail Laporan',CARDS='Kartu Ringkasan',RECAP='Rekapan PKB/WO';
+var SK='Service Kategori',CARDS='Kartu Ringkasan',RECAP='Rekapan PKB/WO';
 
 function emp(v){return v===null||v===undefined||v===''||v==='#N/A'}
 function str(v){return emp(v)?'':String(v)}
@@ -498,11 +495,6 @@ function buildDiv(name,items,raw,fallbackAll,pj,wh,wipRaw,dep){
   sheets.push({name:SK,kind:'table',heads:H,rows:rr,nums:nums,flags:fl,grand:{qty:totQ,val:totV},repdate:fdt(raw.repISO),chipCol:1,
     facts:['<li>WO <b>'+W.length+'</b></li>'],note:nt,chip:null,dateCol:H.indexOf('TglWO'),hariCol:H.indexOf('Hari'),catStats:summary.cats});
 
-  var pjName=function(w){return pj[w]?pj[w][1]:''};
-  var brows=W.map(function(g,k){var r=[String(k+1),fdt(g.tgl),g.wo,g.sa,g.pol,g.cust,g.typ,g.srv,g.chg,g.hari===null?'':String(g.hari),g.kets.join('; '),g.alas.join('; '),pjName(g.wo)];if(isAll)r.splice(1,0,divOf(g.dev));return r});
-  sheets.push({name:DETAIL,kind:'table',heads:(isAll?['No','Divisi']:['No']).concat(['Tgl PKB/WO','No PKB/WO','Nama SA','NoPolisi','Nama Customer','Type',SK,'Charge To','Hari',('Keterangan Team '+(isAll?'':(name==='Body Repair'?'Body Repair':'GR'))).trim(),'Alasan','No Penitipan (PJ)']),rows:brows,flags:brows.map(function(){return false}),
-    facts:['<li>WO <b>'+W.length+'</b></li>','<li>Dibuat <b>'+fdt(raw.repISO)+'</b></li>'],
-    note:'Detail laporan per WO. Kolom Keterangan Team masih kosong karena belum ada isinya di Google Sheet. No Penitipan (PJ) adalah penitipan terakhir untuk WO tersebut dari sheet Data.',chip:null,dateCol:isAll?2:1});
 
   var dvI=wh.indexOf('Divisi'),keep=[];wh.forEach(function(h,k){if(k!==dvI||isAll)keep.push(k)});
   var wrows=wipRaw.map(function(rw){return keep.map(function(k){var v=rw[k],h=wh[k];if(h==='Rate')return fr(v);if(h==='TglInvoice')return emp(v)?'':fdt(v);if(h==='No')return emp(v)?'':String(Math.round(+v));if(h==='Advisor')return SAMAP[str(v)]||str(v);return str(v)})});
@@ -719,7 +711,7 @@ function cellHTML(v,isNum,late,lng){var c=(v==='#N/A')?'err':'';if(isNum)c+=(c?'
 function render(){
   if(!model)return;
   var dv=D(),s=sheetByName(cur),st=tstate(s.name);
-  summaryEl.hidden=(s.kind==='cards');
+  summaryEl.hidden=false;
   if(s.kind==='cards'){
     toolsEl.hidden=true;catsEl.hidden=true;factsEl.innerHTML='';
     grid.className='grid cardsview';grid.innerHTML=cardsHTML();afterRender();return;
@@ -791,17 +783,16 @@ function buildTabs(){
     tabsEl.appendChild(b);
   });
 }
-function toTop(){try{window.scrollTo({top:0,behavior:smooth()})}catch(e){window.scrollTo(0,0)}}
 function buildDivTabs(){
   divTabsEl.innerHTML='';
   model.divs.forEach(function(d){
     var b=document.createElement('button');b.type='button';b.setAttribute('role','tab');b.setAttribute('data-d',d.name);
     b.innerHTML=esc(d.name)+'<small>'+d.summary.wo+' WO</small>';
-    b.addEventListener('click',function(){selectDiv(d.name);toTop()});
+    b.addEventListener('click',function(){selectDiv(d.name)});
     b.addEventListener('keydown',function(e){
       var names=model.divs.map(function(x){return x.name}),k=names.indexOf(curDiv);
-      if(e.key==='ArrowRight'){e.preventDefault();selectDiv(names[(k+1)%names.length],null,true);toTop()}
-      else if(e.key==='ArrowLeft'){e.preventDefault();selectDiv(names[(k+names.length-1)%names.length],null,true);toTop()}
+      if(e.key==='ArrowRight'){e.preventDefault();selectDiv(names[(k+1)%names.length],null,true)}
+      else if(e.key==='ArrowLeft'){e.preventDefault();selectDiv(names[(k+names.length-1)%names.length],null,true)}
     });
     divTabsEl.appendChild(b);
   });
