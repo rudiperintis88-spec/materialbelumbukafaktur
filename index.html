@@ -347,7 +347,7 @@ var FILE_ID='1r0swpSbld_Uukv-urpt8ch-Y0g0l2uCu0djwlp1a4wI', SERVER='Google Drive
 var XLSX_MIME='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 var FALLBACK={'000019/WO/PB/12/25':{tgl:'2025-12-03',srv:'Light'},'000071/WO/PB/12/25':{tgl:'2025-12-12',srv:'Light'}};
 var PRESET={'Light':0,'Medium':1,'Heavy':2};
-var NUMH={'No':1,'Jlh':1,'Harga':1,'Jumlah':1,'Rate':1,'Hari':1,'Total Penitipan':1};
+var NUMH={'No':1,'Jlh':1,'Harga':1,'Jumlah':1,'Rate':1,'Hari':1,'Total Penitipan':1,'Total Nominal':1};
 var DATEH={'TglSupply':1,'TglWO':1,'Tgl PKB/WO':1,'TglInvoice':1,'Tgl Penitipan':1};
 var MONTHS=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 var BUCKETS=[{l:'0–30 hari',t:'ok'},{l:'31–60 hari',t:'amber'},{l:'61–90 hari',t:'orange'},{l:'> 90 hari',t:'red'}];
@@ -432,6 +432,7 @@ function buildDiv(name,items,raw,fallbackAll,pj,wh,wipRaw,dep){
   var isAll=(name===ALL);
   var fallbackUsed={};items.forEach(function(it){if(it.wo&&fallbackAll[it.wo])fallbackUsed[it.wo]=true});
   var sheets=[],hs=function(h){return h===null?'':String(h)};
+  var depCells=function(w){var e=w&&dep&&dep[w];return e?[e.dates,e.nos,fint(e.to)]:['','',''];};
   /* total per kategori -> urutan: Light, Medium, Heavy, lalu kategori lain dari nilai terbesar, Non PKB, Tanpa Kategori */
   var totQ=0,totV=0,cat={},bk=[{v:0,w:{}},{v:0,w:{}},{v:0,w:{}},{v:0,w:{}}],noAge=0;
   items.forEach(function(it){
@@ -447,7 +448,8 @@ function buildDiv(name,items,raw,fallbackAll,pj,wh,wipRaw,dep){
   var wm={},worder=[];
   items.forEach(function(it){
     if(!it.wo)return;
-    var g=wm[it.wo];if(!g){g=wm[it.wo]={wo:it.wo,tgl:'',sa:'',pol:'',dev:'',cust:'',typ:'',srv:'',chg:'',hari:null,kets:[],alas:[]};worder.push(it.wo)}
+    var g=wm[it.wo];if(!g){g=wm[it.wo]={wo:it.wo,tgl:'',sa:'',pol:'',dev:'',cust:'',typ:'',srv:'',chg:'',hari:null,nom:0,kets:[],alas:[]};worder.push(it.wo)}
+    g.nom+=it.jum;
     if(it.ket&&g.kets.indexOf(it.ket)<0)g.kets.push(it.ket);
     if(it.ala&&g.alas.indexOf(it.ala)<0)g.alas.push(it.ala);
     if(!g.tgl)g.tgl=it.two;if(!g.sa)g.sa=it.nsa;if(!g.pol)g.pol=it.pol;if(!g.dev)g.dev=it.dev;if(!g.cust)g.cust=it.cust;if(!g.typ)g.typ=it.typ;if(!g.srv)g.srv=it.srv;if(!g.chg)g.chg=it.chg;
@@ -466,11 +468,12 @@ function buildDiv(name,items,raw,fallbackAll,pj,wh,wipRaw,dep){
   }
 
   var rows=[],flags=[];
-  W.forEach(function(g,k){rows.push([String(k+1),fdt(g.tgl),g.wo,g.sa,g.pol,g.dev,g.cust,g.typ,g.srv,g.chg,g.hari===null?'':String(g.hari)]);flags.push(false)});
+  W.forEach(function(g,k){rows.push([String(k+1),fdt(g.tgl),g.wo,g.sa,g.pol,g.dev,g.cust,g.typ,g.srv,g.chg,g.hari===null?'':String(g.hari),fint(g.nom)].concat(depCells(g.wo)));flags.push(false)});
   var nonp=items.filter(function(it){return it.kat==='Non PKB'}),pm={},pl=[];
-  nonp.forEach(function(it){var k=it.nsup||(it.pol+'|'+it.nsa);if(!pm[k]){pm[k]=it;pl.push(k)}});
-  pl.forEach(function(k){var it=pm[k];rows.push([String(rows.length+1),'#N/A','',it.nsa,it.pol,it.dev,'#N/A','#N/A','#N/A','#N/A',it.hari===null?'':String(it.hari)]);flags.push(true)});
-  sheets.push({name:'Total WO',kind:'table',heads:['No','Tgl PKB/WO','No PKB/WO','Nama SA','NoPolisi','Devisi','Nama Customer','Type',SK,'Charge To','Hari'],rows:rows,flags:flags,
+  var pmS={};
+  nonp.forEach(function(it){var k=it.nsup||(it.pol+'|'+it.nsa);if(!pm[k]){pm[k]=it;pl.push(k);pmS[k]=0}pmS[k]+=it.jum});
+  pl.forEach(function(k){var it=pm[k];rows.push([String(rows.length+1),'#N/A','',it.nsa,it.pol,it.dev,'#N/A','#N/A','#N/A','#N/A',it.hari===null?'':String(it.hari),fint(pmS[k]),'','','']);flags.push(true)});
+  sheets.push({name:'Total WO',kind:'table',heads:['No','Tgl PKB/WO','No PKB/WO','Nama SA','NoPolisi','Devisi','Nama Customer','Type',SK,'Charge To','Hari','Total Nominal','Tgl Penitipan','No.Penitipan','Total Penitipan'],rows:rows,flags:flags,sumCols:['Total Nominal','Total Penitipan'],
     facts:['<li>WO unik <b>'+W.length+'</b> ditambah <b>'+pl.length+'</b> baris Non PKB tanpa WO</li>'],
     note:'Baris Non PKB: No PKB/WO kosong dan Nama Customer #N/A. Hari diambil dari kolom Hari (V) di Sheet1.',chip:'Non PKB',dateCol:1});
 
@@ -732,6 +735,7 @@ function render(){
   toolsEl.hidden=false;
   var idx=visibleIdx(s),h='',qty=0,val=0;
   var nfilt=Object.keys(st.filt).length,filtered=!!(st.q.trim()||nfilt);
+  var sc=(s.sumCols||[]).map(function(h){return s.heads.indexOf(h)}).filter(function(i){return i>-1}),ssum=sc.map(function(){return 0});
   var noCol=(s.heads[0]==='No'),hc=s.heads.indexOf('Hari'),LONGC=s.heads.map(function(x){return x==='Alasan'||x==='Keterangan'||String(x).indexOf('Keterangan Team')===0});
   h='<table><thead><tr>'+s.heads.map(function(x,j){
     if(!x)return '<th></th>';
@@ -743,14 +747,16 @@ function render(){
   idx.forEach(function(i){
     var r=s.rows[i];nn++;
     if(s.nums){qty+=s.nums[i][0];val+=s.nums[i][1]}
+    sc.forEach(function(ci,k){var n=parseNum(r[ci]);if(n!==null)ssum[k]+=n});
     h+='<tr'+(s.flags[i]?' class="flag"':'')+'>'+r.map(function(v,j){return cellHTML((noCol&&j===0)?String(nn):v,NUMH[s.heads[j]],j===hc&&v!==''&&+v>90,LONGC[j])}).join('')+'</tr>';
   });
-  if(s.grand&&idx.length){
-    h+='<tr class="total">'+s.heads.map(function(x,j){var v='';if(j===0)v=filtered?'Total tampil:':'Grand Total:';if(x==='Jlh')v=fint(filtered?qty:s.grand.qty);if(x==='Jumlah')v=fint(filtered?val:s.grand.val);return '<td'+(NUMH[x]?' class="num"':'')+'>'+v+'</td>'}).join('')+'</tr>';
+  if((s.grand||sc.length)&&idx.length){
+    h+='<tr class="total">'+s.heads.map(function(x,j){var v='';if(j===0)v=filtered?'Total tampil:':'Grand Total:';if(s.grand&&x==='Jlh')v=fint(filtered?qty:s.grand.qty);if(s.grand&&x==='Jumlah')v=fint(filtered?val:s.grand.val);var kk=sc.indexOf(j);if(kk>-1)v=fint(ssum[kk]);return '<td'+(NUMH[x]?' class="num"':'')+'>'+v+'</td>'}).join('')+'</tr>';
   }
   h+='</tbody></table>';
   var f='<li><b>'+idx.length+'</b> dari '+s.rows.length+' baris</li>';
   if(s.grand)f+='<li>Qty <b>'+fint(filtered?qty:s.grand.qty)+'</b></li><li>Jumlah <b>Rp'+fint(filtered?val:s.grand.val)+'</b></li>';
+  sc.forEach(function(ci,k){f+='<li>'+esc(s.heads[ci])+' <b>Rp'+fint(ssum[k])+'</b></li>'});
   if(!filtered&&s.facts)f+=s.facts.join('');
   factsEl.innerHTML=f;
   grid.innerHTML=idx.length?h:'<div class="empty">Tidak ada baris yang cocok. Ubah kata cari atau klik Atur ulang.</div>';
@@ -1029,7 +1035,9 @@ function exportOf(s,filtered){
     if(types[j]==='date'){if(String(v).indexOf(';')>-1)return v;var d=parseDateSerial(v);return d===null?'':d}
     return v;
   })});
-  return {name:s.name,heads:s.heads.slice(),disp:disp,cells:cells,types:types,flags:flags,grand:s.grand?{qty:qty,val:val}:null,count:disp.length,filter:filtered?describeFilter(s):''};
+  var sums=null;
+  if(s.sumCols&&s.sumCols.length){sums={};s.sumCols.forEach(function(h){var ci=s.heads.indexOf(h);if(ci<0)return;var tot=0;cells.forEach(function(r){if(typeof r[ci]==='number')tot+=r[ci]});sums[h]=tot})}
+  return {name:s.name,heads:s.heads.slice(),disp:disp,cells:cells,types:types,flags:flags,grand:s.grand?{qty:qty,val:val}:null,sums:sums,count:disp.length,filter:filtered?describeFilter(s):''};
 }
 function cardsExport(){
   var dv=D(),buckets=['0-30 hari','31-60 hari','61-90 hari','> 90 hari'],isAllTab=(dv.name===ALL);
@@ -1064,7 +1072,7 @@ function excelSheet(exp,title){
   exp.cells.forEach(function(r){aoa.push(r)});
   var firstData=hr+1,lastData=hr+exp.cells.length;
   var totalRow=null;
-  if(exp.grand&&exp.cells.length){
+  if((exp.grand||exp.sums)&&exp.cells.length){
     totalRow=aoa.length;
     var t=exp.heads.map(function(h,j){return j===0?'Total':''});
     aoa.push(t);
@@ -1078,9 +1086,11 @@ function excelSheet(exp,title){
   });
   if(totalRow!==null){
     exp.heads.forEach(function(h,j){
-      if(h==='Jlh'||h==='Jumlah'){
-        var col=XLSX.utils.encode_col(j),v=h==='Jlh'?exp.grand.qty:exp.grand.val;
-        ws[XLSX.utils.encode_cell({r:totalRow,c:j})]={t:'n',v:v,f:'SUM('+col+(firstData+1)+':'+col+(lastData+1)+')',z:'#,##0'};
+      var sv=null;
+      if(exp.grand&&h==='Jlh')sv=exp.grand.qty;else if(exp.grand&&h==='Jumlah')sv=exp.grand.val;else if(exp.sums&&exp.sums[h]!==undefined)sv=exp.sums[h];
+      if(sv!==null){
+        var col=XLSX.utils.encode_col(j);
+        ws[XLSX.utils.encode_cell({r:totalRow,c:j})]={t:'n',v:sv,f:'SUM('+col+(firstData+1)+':'+col+(lastData+1)+')',z:'#,##0'};
       }
     });
   }
@@ -1140,7 +1150,7 @@ function exportPdf(){
     doc.setFontSize(8.5);doc.setTextColor(106,111,128);doc.text(pdfText(info),M,y);y+=4.5;
     if(exp.filter){doc.text(pdfText(exp.filter),M,y);y+=4.5}
     var hariCol=exp.heads.indexOf('Hari'),body=exp.disp.map(function(r){return r.map(pdfText)}),foot;
-    if(exp.grand){foot=[exp.heads.map(function(h,j){return j===0?'Total':(h==='Jlh'?fint(exp.grand.qty):(h==='Jumlah'?fint(exp.grand.val):''))})]}
+    if(exp.grand||exp.sums){foot=[exp.heads.map(function(h,j){if(j===0)return 'Total';if(exp.grand&&h==='Jlh')return fint(exp.grand.qty);if(exp.grand&&h==='Jumlah')return fint(exp.grand.val);if(exp.sums&&exp.sums[h]!==undefined)return fint(exp.sums[h]);return ''})]}
     var colStyles={};
     exp.types.forEach(function(t,j){if(t==='num'||t==='pct')colStyles[j]={halign:'right'}});
     doc.autoTable({
