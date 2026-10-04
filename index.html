@@ -117,21 +117,21 @@ button,select,input{font:inherit;color:var(--ink)}
 .sechead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 20px;margin-top:54px}
 .sechead h2{margin:0;font-size:32px}
 .sechead .cap{color:var(--muted);font-size:14.5px}
-nav.subtabs{display:inline-flex;gap:4px;margin-top:0;background:var(--thbg);border-radius:12px;padding:4px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+nav.subtabs{display:flex;flex:0 1 auto;min-width:0;gap:2px;margin-top:0;background:var(--thbg);border-radius:12px;padding:4px;max-width:100%;overflow-x:auto;scrollbar-width:none}
 nav.subtabs::-webkit-scrollbar{display:none}
-nav.subtabs button{all:unset;box-sizing:border-box;flex:none;padding:9px 18px;border-radius:9px;cursor:pointer;font-weight:600;font-size:14.5px;color:var(--muted);white-space:nowrap}
+nav.subtabs button{all:unset;box-sizing:border-box;flex:none;padding:8px calc(var(--ts,13.5px)*.8);border-radius:9px;cursor:pointer;font-weight:600;font-size:var(--ts,13.5px);color:var(--muted);white-space:nowrap}
 nav.subtabs button:hover{color:var(--ink)}
 nav.subtabs button:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
 nav.subtabs button[aria-selected="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(20,22,31,.18)}
-nav.subtabs button small{display:inline-block;margin-left:7px;font-size:12px;font-weight:600;color:var(--muted)}
+nav.subtabs button small{display:inline-block;margin-left:6px;font-size:calc(var(--ts,13.5px) - 2px);font-weight:600;color:var(--muted)}
 nav.subtabs button[aria-selected="true"] small{color:var(--accent)}
 
 /* baris tab + ekspor */
-.tabrow{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin-top:18px}
-.export{display:flex;gap:8px;align-items:center}
+.tabrow{--ts:clamp(11.5px,calc(1vw + .3px),13.5px);display:flex;flex-wrap:nowrap;gap:10px 14px;align-items:center;justify-content:space-between;margin-top:18px}
+.export{display:flex;flex:none;gap:6px;align-items:center}
 .xmenu{position:relative}
-.xbtn{padding:8px 14px;gap:8px;font-size:14px}
-.xbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.xbtn{padding:7px 12px;gap:6px;font-size:13.5px}
+.xbtn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .xbtn .car{width:14px;height:14px;margin-left:-2px;opacity:.7}
 #xlsBtn svg:first-child{color:#1d7a46}
 #pdfBtn svg:first-child{color:#c8372d}
@@ -140,7 +140,9 @@ nav.subtabs button[aria-selected="true"] small{color:var(--accent)}
 .menu button:hover,.menu button:focus-visible{background:var(--hover)}
 .menu button:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
 .menu small{color:var(--muted);font-size:12px}
-@media (max-width:1180px){.tabrow{margin-top:16px}.menu{left:0;right:auto}}
+@media (max-width:1180px){.tabrow{margin-top:16px}}
+@media (max-width:780px){.tabrow{flex-wrap:wrap;--ts:13px}.menu{left:0;right:auto}}
+@media (min-width:1181px) and (max-width:1400px){.page{padding-left:32px;padding-right:32px}}
 /* alat tabel */
 .tools{margin-top:18px;display:flex;flex-direction:column;gap:12px}
 .facts{display:flex;flex-wrap:wrap;gap:2px 22px;margin:0;padding:0;list-style:none}
@@ -277,7 +279,6 @@ tr.total td{background:var(--mark);color:var(--markink);font-weight:700;border-t
   .sechead{margin-top:30px}
   .sechead h2{font-size:22px}
   .sechead .cap{font-size:12.5px}
-  nav.subtabs button{padding:8px 13px;font-size:13.5px}
   th,td{padding:8px 10px}
   #ftoggle{display:inline-flex}
   .controls:not(.fopen) .filters{display:none}
@@ -528,9 +529,9 @@ function buildDiv(name,items,raw,fallbackAll,pj,wh,wipRaw,dep){
   var dvI=wh.indexOf('Divisi'),keep=[];wh.forEach(function(h,k){if(k!==dvI||isAll)keep.push(k)});
   var wrows=wipRaw.map(function(rw){return keep.map(function(k){var v=rw[k],h=wh[k];if(h==='Rate')return fr(v);if(h==='TglInvoice')return emp(v)?'':fdt(v);if(h==='No')return emp(v)?'':String(Math.round(+v));if(h==='Advisor')return SAMAP[str(v)]||str(v);return str(v)})});
   var wheads=keep.map(function(k){return hs(wh[k])}),nwk=wheads.indexOf('NoWO');
-  if(nwk>-1){wheads.splice(nwk+1,0,'Tgl PKB/WO');wrows=wrows.map(function(r){r.splice(nwk+1,0,fdt(WOTGL[r[nwk]]||''));return r})}
+  if(nwk>-1){wheads.splice(nwk,0,'Tgl PKB/WO');wrows=wrows.map(function(r){r.splice(nwk,0,fdt(WOTGL[r[nwk]]||''));return r});wheads[nwk+1]='No PKB/WO'}
   var invI=wheads.indexOf('InvoiceNo');
-  sheets.push({name:WIP,kind:'table',heads:wheads,rows:wrows,flags:wrows.map(function(){return false}),dateCol:nwk>-1?nwk+1:undefined,
+  sheets.push({name:WIP,kind:'table',heads:wheads,rows:wrows,flags:wrows.map(function(){return false}),dateCol:nwk>-1?nwk:undefined,
     facts:['<li>Belum ada invoice <b>'+wrows.filter(function(r){return r[invI]===''}).length+'</b> PKB/WO</li>'],note:'',chip:null,emptyMsg:'Belum ada PKB/WO yang sedang berjalan (Work In Process) untuk divisi '+name+'.'});
   var ncards=0;if(isAll){var dk={};items.forEach(function(it){dk[it.div+'|'+it.kat]=1});ncards=Object.keys(dk).length}else ncards=summary.cats.length;
   var crows=[];for(var ci=0;ci<ncards;ci++)crows.push('');
