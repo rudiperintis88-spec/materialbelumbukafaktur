@@ -374,7 +374,7 @@ var NUMH={'No':1,'Jlh':1,'Harga':1,'Jumlah':1,'Rate':1,'Hari':1,'Total Penitipan
 var DATEH={'TglSupply':1,'TglWO':1,'Tgl PKB/WO':1,'TglInvoice':1,'Tgl Penitipan':1};
 var MONTHS=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 var BUCKETS=[{l:'0–30 hari',t:'ok'},{l:'31–60 hari',t:'amber'},{l:'61–90 hari',t:'orange'},{l:'> 90 hari',t:'red'}];
-var SK='Service Kategori',CARDS='Kartu Ringkasan',GAB='Ringkasan Gabungan',RECAP='Rekapan PKB/WO';
+var SK='Service Kategori',CARDS='Kartu Ringkasan',GAB='Ringkasan Gabungan',RECAP='Rekapan PKB/WO',WIP='PKB/WO (Work In Process)',WOTGL={};
 
 function emp(v){return v===null||v===undefined||v===''||v==='#N/A'}
 function str(v){return emp(v)?'':String(v)}
@@ -407,6 +407,8 @@ function build(raw){
   raw.ct.forEach(function(c){if(c[0]&&!ctMap[c[0]])ctMap[c[0]]={type:str(c[1]),srv:str(c[2]),chg:str(c[3]),tgl:c[4]||'',nama:str(c[5])}});
   var wh=raw.wip.heads,wi={};wh.forEach(function(h,k){wi[h]=k});
   raw.wip.rows.forEach(function(w){var k=w[wi['NoWO']];if(k&&!wipMap[k])wipMap[k]={type:str(w[wi['Type']]),nama:str(w[wi['Nama']]),chg:str(w[wi['Charge']])}});
+  WOTGL={};Object.keys(ctMap).forEach(function(k){if(ctMap[k].tgl)WOTGL[k]=ctMap[k].tgl});
+  Object.keys(FALLBACK).forEach(function(k){if(!WOTGL[k])WOTGL[k]=FALLBACK[k].tgl});
   var fallbackUsed={},items=[];
   raw.s1.forEach(function(x){
     if(typeof x[0]!=='number'&&!(typeof x[0]==='string'&&x[0]!==''&&!isNaN(+x[0])))return;
@@ -424,6 +426,7 @@ function build(raw){
     if(it.hari===null&&it.two&&raw.repISO)it.hari=dayDiff(raw.repISO,it.two);
     it.kat=(!wo&&!it.cust)?'Non PKB':(it.srv||'Tanpa Kategori');
     it.div=divOf(it.dev);
+    if(it.wo&&it.two&&!WOTGL[it.wo])WOTGL[it.wo]=it.two;
     items.push(it);
   });
   SAMAP={};Object.keys(SA_DEFAULT).forEach(function(k){SAMAP[k]=SA_DEFAULT[k]});
@@ -524,9 +527,11 @@ function buildDiv(name,items,raw,fallbackAll,pj,wh,wipRaw,dep){
 
   var dvI=wh.indexOf('Divisi'),keep=[];wh.forEach(function(h,k){if(k!==dvI||isAll)keep.push(k)});
   var wrows=wipRaw.map(function(rw){return keep.map(function(k){var v=rw[k],h=wh[k];if(h==='Rate')return fr(v);if(h==='TglInvoice')return emp(v)?'':fdt(v);if(h==='No')return emp(v)?'':String(Math.round(+v));if(h==='Advisor')return SAMAP[str(v)]||str(v);return str(v)})});
-  var wheads=keep.map(function(k){return hs(wh[k])}),invI=wheads.indexOf('InvoiceNo');
-  sheets.push({name:'PKB WIP',kind:'table',heads:wheads,rows:wrows,flags:wrows.map(function(){return false}),
-    facts:['<li>Belum ada invoice <b>'+wrows.filter(function(r){return r[invI]===''}).length+'</b> PKB/WO</li>'],note:'',chip:null,emptyMsg:'Sheet PKB WIP belum memuat baris untuk divisi '+name+'.'});
+  var wheads=keep.map(function(k){return hs(wh[k])}),nwk=wheads.indexOf('NoWO');
+  if(nwk>-1){wheads.splice(nwk+1,0,'Tgl PKB/WO');wrows=wrows.map(function(r){r.splice(nwk+1,0,fdt(WOTGL[r[nwk]]||''));return r})}
+  var invI=wheads.indexOf('InvoiceNo');
+  sheets.push({name:WIP,kind:'table',heads:wheads,rows:wrows,flags:wrows.map(function(){return false}),dateCol:nwk>-1?nwk+1:undefined,
+    facts:['<li>Belum ada invoice <b>'+wrows.filter(function(r){return r[invI]===''}).length+'</b> PKB/WO</li>'],note:'',chip:null,emptyMsg:'Belum ada PKB/WO yang sedang berjalan (Work In Process) untuk divisi '+name+'.'});
   var ncards=0;if(isAll){var dk={};items.forEach(function(it){dk[it.div+'|'+it.kat]=1});ncards=Object.keys(dk).length}else ncards=summary.cats.length;
   var crows=[];for(var ci=0;ci<ncards;ci++)crows.push('');
   sheets.push({name:CARDS,kind:'cards',view:'kartu',heads:[],rows:crows,flags:[]});
@@ -744,7 +749,7 @@ function render(){
     grid.className='grid cardsview';grid.innerHTML=cardsHTML(s);afterRender();return;
   }
   grid.className='grid';
-  if(!dv.summary.rows&&s.name!=='PKB WIP'||!dv.summary.rows&&!s.rows.length){
+  if(!dv.summary.rows&&s.name!==WIP||!dv.summary.rows&&!s.rows.length){
     toolsEl.hidden=true;factsEl.innerHTML='';
     grid.innerHTML='<div class="empty"><b>Belum ada data untuk '+esc(dv.name)+'.</b><br>Kolom Devisi di Sheet1 belum memuat baris untuk divisi ini.</div>';
     afterRender();return;
