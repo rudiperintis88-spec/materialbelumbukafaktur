@@ -372,7 +372,7 @@ var XLSX_MIME='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 var FALLBACK={'000019/WO/PB/12/25':{tgl:'2025-12-03',srv:'Light'},'000071/WO/PB/12/25':{tgl:'2025-12-12',srv:'Light'}};
 var PRESET={'Light':0,'Medium':1,'Heavy':2};
 var NUMH={'No':1,'Jlh':1,'Harga':1,'Jumlah':1,'Rate':1,'Hari':1,'Total Penitipan':1,'Total Nominal':1};
-var DATEH={'TglSupply':1,'TglWO':1,'Tgl PKB/WO':1,'TglInvoice':1,'Tgl Penitipan':1};
+var DATEH={'TglSupply':1,'Tgl PKB/WO':1,'TglInvoice':1,'Tgl Penitipan':1};
 var MONTHS=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 var BUCKETS=[{l:'0–30 hari',t:'ok'},{l:'31–60 hari',t:'amber'},{l:'61–90 hari',t:'orange'},{l:'> 90 hari',t:'red'}];
 var SK='Service Kategori',CARDS='Kartu Ringkasan',GAB='Ringkasan Gabungan',RECAP='Rekapan PKB/WO',WIP='PKB/WO (Work In Process)',WOTGL={};
@@ -507,7 +507,7 @@ function buildDiv(name,items,raw,fallbackAll,pj,wh,wipRaw,dep){
     facts:[],
     note:'Baris Non PKB: No PKB/WO kosong dan Nama Customer #N/A. Hari diambil dari kolom Hari (V) di Sheet1.',chip:'Non PKB',dateCol:1});
 
-  var H=['No',SK,'TglSupply','NoSupply','No PKB/WO','KodeBrg','Nama Barang','Jlh','Harga','Jumlah','Nama SA','NoPolisi','Devisi','Nama Customer','Type','Charge To','TglWO','Hari','Tgl Penitipan','No.Penitipan','Total Penitipan','Keterangan','Alasan'];
+  var H=['No',SK,'TglSupply','NoSupply','No PKB/WO','KodeBrg','Nama Barang','Jlh','Harga','Jumlah','Nama SA','NoPolisi','Devisi','Nama Customer','Type','Charge To','Tgl PKB/WO','Hari','Tgl Penitipan','No.Penitipan','Total Penitipan','Keterangan','Alasan'];
   var q=items.slice().sort(function(a,b){
     var oa=rank(a.kat),ob=rank(b.kat);
     return (oa-ob)||cmpNullLast(a.two,b.two)||cmpNullLast(a.wo,b.wo)||cmpNullLast(a.tsup,b.tsup)||cmpNullLast(a.nsup,b.nsup);
@@ -523,7 +523,7 @@ function buildDiv(name,items,raw,fallbackAll,pj,wh,wipRaw,dep){
   var nt='Gabungan semua service kategori '+(isAll?'dari ketiga divisi':'divisi '+name)+' ('+summary.cats.map(function(c){return c.k}).join(', ')+'). Service Kategori diambil dari Sheet1 (asalnya dari sheet Charge To).';
   if(fbn.length)nt+=' WO '+fbn.join(' dan ')+' tidak ada di sheet Charge To: nama, tipe, dan charge diambil dari PKB WIP, kategori dan tanggal WO dari catatan tambahan.';
   sheets.push({name:SK,kind:'table',heads:H,rows:rr,nums:nums,flags:fl,grand:{qty:totQ,val:totV},repdate:fdt(raw.repISO),chipCol:1,
-    facts:[],note:nt,chip:null,dateCol:H.indexOf('TglWO'),hariCol:H.indexOf('Hari'),catStats:summary.cats});
+    facts:[],note:nt,chip:null,dateCol:H.indexOf('Tgl PKB/WO'),hariCol:H.indexOf('Hari'),catStats:summary.cats});
 
 
   var dvI=wh.indexOf('Divisi'),keep=[];wh.forEach(function(h,k){if(k!==dvI||isAll)keep.push(k)});
