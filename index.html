@@ -1630,7 +1630,7 @@ dialog::backdrop{background:rgba(10,16,24,.55)}
     <button class="btn" id="dlgX" type="button">Tutup</button>
   </div>
   <div class="tools">
-    <input type="search" id="dlgQ" placeholder="Cari nama, no polisi, type, no rangka, salesman, supervisor, leasing" aria-label="Cari di detail">
+    <input type="search" id="dlgQ" placeholder="Cari nama, no polisi, no bast, type, no rangka, salesman, supervisor, leasing" aria-label="Cari di detail">
     <button class="btn pri" id="dlgXls" type="button">Export Excel</button>
   </div>
   <div class="scroll" id="dlgScroll" tabindex="0" role="region" aria-label="Tabel detail, geser dengan tombol panah kiri dan kanan" style="max-height:58vh"><table class="data" id="dlgTbl"></table></div>
@@ -1683,9 +1683,10 @@ var SPEC={
   biro:[['birojasa','biro jasa'],'last'],
   leasing:[['leasing'],'last'],
   sales:[['salesman'],'last'],
-  spv:[['supervisor'],'last']
+  spv:[['supervisor'],'last'],
+  bast:[['no. bast','no.bast','no bast','nobast'],'first']
 };
-var LABEL={no:'No',nama:'STNK a/n:',chassis:'NoRangka',polisi:'No Polisi (grup STNK)',terima:'Terima Tanggal (grup BPKB)',serah:'Serah Tanggal (grup BPKB)',cetak:'BPKB_No Cetak',ket:'Keterangan',surat:'Surat Pernyataan BPKB',leasing:'Leasing'};
+var LABEL={no:'No',nama:'STNK a/n:',chassis:'NoRangka',polisi:'No Polisi (grup STNK)',terima:'Terima Tanggal (grup BPKB)',serah:'Serah Tanggal (grup BPKB)',cetak:'BPKB_No Cetak',ket:'Keterangan',surat:'Surat Pernyataan BPKB',leasing:'Leasing',bast:'No. Bast'};
 function headerCols(rows){
   var hr=-1;
   for(var i=0;i<rows.length&&hr<0;i++){var nr=rows[i].map(norm); if(nr.indexOf('no')>=0&&nr.some(function(x){return /a\/n|^nama$/.test(x)})) hr=i}
@@ -1722,7 +1723,7 @@ function sheetData(text,hdrRows,sheetName,WARN){
   if(!data.length) throw new Error('sheet '+sheetName+' tidak berisi baris data');
   var g=function(r,k){return idx[k]<0?'':(r[idx[k]]||'').trim()}, d=function(r,k){return idx[k]<0?'':nd(r[idx[k]])};
   var out=data.map(function(r){
-    return [parseInt(r[idx.no].replace(/[^\d]/g,''),10),g(r,'nama'),g(r,'type'),g(r,'chassis'),g(r,'polisi'),d(r,'terima'),d(r,'serah'),g(r,'cetak'),g(r,'leasing'),g(r,'biro'),g(r,'sales'),g(r,'spv'),g(r,'surat'),g(r,'ket'),g(r,'alasan')];
+    return [parseInt(r[idx.no].replace(/[^\d]/g,''),10),g(r,'nama'),g(r,'type'),g(r,'chassis'),g(r,'polisi'),d(r,'terima'),d(r,'serah'),g(r,'cetak'),g(r,'leasing'),g(r,'biro'),g(r,'sales'),g(r,'spv'),g(r,'surat'),g(r,'ket'),g(r,'alasan'),g(r,'bast')];
   });
   var w=[];
   if(idx.biro<0) w.push('Sheet '+sheetName+': judul kolom BiroJasa tidak ditemukan.');
@@ -1742,7 +1743,7 @@ function typesFrom(text){
   return m;
 }
 /* ====== Klasifikasi ====== */
-var I={no:0,nama:1,type:2,tf:3,polisi:4,terima:5,serah:6,cetak:7,leasing:8,biro:9,sales:10,spv:11,surat:12,ket:13,alasan:14,kat:15,div:16,chassis:17,thn:18,stat:19,kuasa:20};
+var I={no:0,nama:1,type:2,tf:3,polisi:4,terima:5,serah:6,cetak:7,leasing:8,biro:9,sales:10,spv:11,surat:12,ket:13,alasan:14,kat:15,div:16,chassis:17,thn:18,stat:19,kuasa:20,bast:21};
 var SURAT_OK=/surat\s+(pernyataan|konfirmasi|kesepakatan)[\s\S]*\bada\b/i;
 var KSHORT={ada:'Fisik ada',surat:'Surat belum lengkap',proses:'Proses pengantaran',lain:'Lainnya'};
 function isCash(l){return (l||'').trim().toLowerCase()==='cash'}
@@ -1767,7 +1768,7 @@ function buildRows(raw,types,divName){
   for(var i=0;i<raw.length;i++){
     var r=raw[i], ch=(r[3]||'').toUpperCase(), inf=types[ch], ty=inf?inf[0]:'', sl=inf?inf[1]:r[10], sv=inf?inf[2]:r[11], ls=(inf&&inf[3])?inf[3]:r[8];
     var k=kat(r[13],r[12],r[14],ls), t=r[5]||r[6]||'', yr=t?t.slice(6):'';
-    out[i]=[r[0],r[1],ty||r[2],ty?1:0,r[4],r[5],r[6],r[7],ls,r[9],sl,sv,r[12],r[13],r[14],k,divName||'',r[3]||'',yr,KSHORT[k],/kuasa/i.test([r[13],r[14],r[12]].join(' '))?1:0];
+    out[i]=[r[0],r[1],ty||r[2],ty?1:0,r[4],r[5],r[6],r[7],ls,r[9],sl,sv,r[12],r[13],r[14],k,divName||'',r[3]||'',yr,KSHORT[k],/kuasa/i.test([r[13],r[14],r[12]].join(' '))?1:0,r[15]||''];
   }
   out.sort(function(a,b){return a[0]-b[0]});
   return out;
@@ -1796,7 +1797,7 @@ var KATS=[
  {k:'lain',label:'Keterangan lain atau kosong',short:'Lainnya',sheet:'Lainnya',desc:'Di luar kategori di atas'}
 ];
 var VT={k:'kuasa',label:'Diserahkan via Surat Kuasa',short:'Via surat kuasa',sheet:'Via Surat Kuasa',desc:'Teks Keterangan atau Keterangan/ Alasan menyebut kata kuasa'};
-var COLS=[['No',I.no,'nw','seq'],['STNK a/n:',I.nama,'','txt'],['Type',I.type,'type','txt'],['No Polisi',I.polisi,'','txt'],['Terima Tanggal',I.terima,'dt','date'],['Serah Tanggal',I.serah,'dt','date'],['BPKB_No Cetak',I.cetak,'','txt'],['Leasing',I.leasing,'','txt'],['Biro Jasa',I.biro,'','txt'],['Salesman',I.sales,'','txt'],['Supervisor',I.spv,'','txt'],['Surat Pernyataan',I.surat,'','txt'],['Keterangan',I.ket,'ket','txt'],['Keterangan/ Alasan',I.alasan,'','txt'],['Status',I.stat,'','txt'],['NoRangka',I.chassis,'','txt']];
+var COLS=[['No',I.no,'nw','seq'],['STNK a/n:',I.nama,'','txt'],['Type',I.type,'type','txt'],['NoRangka',I.chassis,'','txt'],['No. Bast',I.bast,'','txt'],['No Polisi',I.polisi,'','txt'],['Terima Tanggal',I.terima,'dt','date'],['Serah Tanggal',I.serah,'dt','date'],['BPKB_No Cetak',I.cetak,'','txt'],['Leasing',I.leasing,'','txt'],['Biro Jasa',I.biro,'','txt'],['Salesman',I.sales,'','txt'],['Supervisor',I.spv,'','txt'],['Surat Pernyataan',I.surat,'','txt'],['Keterangan',I.ket,'ket','txt'],['Keterangan/ Alasan',I.alasan,'','txt'],['Status',I.stat,'','txt']];
 var LEAK='(kosong)';
 var leaOf=function(r){return r[I.leasing]||LEAK};
 function makeNotes(rows){
@@ -2091,7 +2092,7 @@ Division.prototype.match=function(r,tab){
   if(st.thn&&r[I.thn]!==st.thn) return false;
   var q=st.q.trim().toLowerCase();
   if(q){
-    var s=[r[I.nama],r[I.type],r[I.chassis],r[I.polisi],r[I.sales],r[I.spv],r[I.biro],r[I.leasing],r[I.cetak],r[I.surat],r[I.ket],r[I.alasan]].join(' ').toLowerCase();
+    var s=[r[I.nama],r[I.type],r[I.chassis],r[I.bast],r[I.polisi],r[I.sales],r[I.spv],r[I.biro],r[I.leasing],r[I.cetak],r[I.surat],r[I.ket],r[I.alasan]].join(' ').toLowerCase();
     if(s.indexOf(q)<0) return false;
   }
   return true;
@@ -2246,7 +2247,7 @@ function openDetail(k,scope,lea){
 }
 function detailRows(){
   var q=DT.q.trim().toLowerCase(), rows=DT.rows;
-  if(q) rows=rows.filter(function(r){return [r[I.nama],r[I.type],r[I.chassis],r[I.polisi],r[I.sales],r[I.spv],r[I.biro],r[I.leasing],r[I.surat],r[I.ket],r[I.alasan],r[I.div]].join(' ').toLowerCase().indexOf(q)>=0});
+  if(q) rows=rows.filter(function(r){return [r[I.nama],r[I.type],r[I.chassis],r[I.bast],r[I.polisi],r[I.sales],r[I.spv],r[I.biro],r[I.leasing],r[I.surat],r[I.ket],r[I.alasan],r[I.div]].join(' ').toLowerCase().indexOf(q)>=0});
   return DT.sortCol===null?rows:sortRows(rows,DT.cols[DT.sortCol],DT.sortDir);
 }
 function renderDetail(){
