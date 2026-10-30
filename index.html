@@ -319,7 +319,7 @@ dialog::backdrop{background:rgba(10,16,24,.55)}
   </div>
   <div class="tools">
     <input type="search" id="dlgQ" placeholder="Cari nama, no polisi, type, salesman, supervisor, biro jasa" aria-label="Cari di detail">
-    <select id="dlgBiro" aria-label="Filter biro jasa"><option value="">Semua Biro Jasa</option></select>
+    <select id="dlgBiro" aria-label="Filter biro jasa"><option value="">Semua biro jasa</option></select>
     <button class="btn pri" id="dlgXls" type="button">Export Excel</button>
   </div>
   <div class="scroll" id="dlgScroll" tabindex="0" role="region" aria-label="Tabel detail, geser dengan tombol panah kiri dan kanan" style="max-height:58vh"><table class="data" id="dlgTbl"></table></div>
@@ -756,9 +756,9 @@ function openDetail(key,scope,biro){
   else if(key==='cnt4'){DT.sortCol=ci(I.l4);DT.sortDir='desc'}
   else if(/^b2:|^cnt2$/.test(key)){DT.sortCol=ci(I.l2);DT.sortDir='desc'}
   $('dlgQ').value=''; DT.biro='';
-  var bset={}; DT.rows.forEach(function(r){bset[biroLabel(r)]=true});
-  var blist=Object.keys(bset).sort(function(a,b){return a.localeCompare(b,'id')});
-  $('dlgBiro').innerHTML='<option value="">Semua Biro Jasa</option>'+blist.map(function(x){return '<option value="'+esc(x)+'">'+esc(x)+'</option>'}).join('');
+  var bcnt={}; DT.rows.forEach(function(r){var b=biroLabel(r); bcnt[b]=(bcnt[b]||0)+1});
+  var blist=Object.keys(bcnt).sort(function(a,b){return bcnt[b]-bcnt[a]});
+  $('dlgBiro').innerHTML='<option value="">Semua biro jasa ('+fmt(DT.rows.length)+')</option>'+blist.map(function(x){return '<option value="'+esc(x)+'">'+esc(x)+' ('+fmt(bcnt[x])+')</option>'}).join('');
   $('dlgBiro').value='';
   var d=$('dlg'); if(typeof d.showModal==='function'){ if(!d.open) d.showModal() } else d.setAttribute('open','');
   renderDetail();
@@ -840,7 +840,7 @@ Division.prototype.selects=function(){
   if(st.met&&!this.cM[st.met]) st.met=''; if(st.eks&&!this.cE[st.eks]) st.eks='';
   fm.value=st.met; fe.value=st.eks; this.q('.fb').value=st.bp; fe.disabled=!this.EKS.length;
   var fbiro=this.q('.fbiro');
-  fbiro.innerHTML='<option value="">Semua</option>'+this.BIROS.map(function(k){return '<option value="'+esc(k)+'">'+esc(k)+' ('+fmt(self.cB[k])+')</option>'}).join('');
+  fbiro.innerHTML='<option value="">Semua biro jasa ('+fmt(this.total)+')</option>'+this.BIROS.map(function(k){return '<option value="'+esc(k)+'">'+esc(k)+' ('+fmt(self.cB[k])+')</option>'}).join('');
   if(st.biro&&!this.cB[st.biro]) st.biro='';
   fbiro.value=st.biro;
 };
@@ -1663,7 +1663,7 @@ dialog::backdrop{background:rgba(10,16,24,.55)}
   </div>
   <div class="tools">
     <input type="search" id="dlgQ" placeholder="Cari nama, no polisi, no bast, type, no rangka, salesman, supervisor, leasing" aria-label="Cari di detail">
-    <select id="dlgBiro" aria-label="Filter biro jasa"><option value="">Semua Biro Jasa</option></select>
+    <select id="dlgBiro" aria-label="Filter biro jasa"><option value="">Semua biro jasa</option></select>
     <button class="btn pri" id="dlgXls" type="button">Export Excel</button>
   </div>
   <div class="scroll" id="dlgScroll" tabindex="0" role="region" aria-label="Tabel detail, geser dengan tombol panah kiri dan kanan" style="max-height:58vh"><table class="data" id="dlgTbl"></table></div>
@@ -2118,7 +2118,7 @@ Division.prototype.selects=function(){
   if(st.lea&&!this.L[st.lea]) st.lea=''; if(st.thn&&this.yrs.indexOf(st.thn)<0) st.thn='';
   fl.value=st.lea; fy.value=st.thn; this.q('.fj').value=st.jen;
   var fbiro=this.q('.fbiro'), cB=this.cB, bks=Object.keys(cB).sort(function(a,b){return cB[b]-cB[a]});
-  fbiro.innerHTML='<option value="">Semua</option>'+bks.map(function(k){return '<option value="'+esc(k)+'">'+esc(k)+' ('+fmt(cB[k])+')</option>'}).join('');
+  fbiro.innerHTML='<option value="">Semua biro jasa ('+fmt(this.total)+')</option>'+bks.map(function(k){return '<option value="'+esc(k)+'">'+esc(k)+' ('+fmt(cB[k])+')</option>'}).join('');
   if(st.biro&&!cB[st.biro]) st.biro='';
   fbiro.value=st.biro;
 };
@@ -2285,9 +2285,9 @@ function openDetail(k,scope,lea){
   DT.cols=(scope==='*'?[['Divisi',I.div,'','txt']]:[]).concat(COLS); DT.colW=colWidths(DT.rows,DT.cols);
   DT.sortCol=null; DT.sortDir=null;
   $('dlgQ').value=''; DT.biro='';
-  var bset={}; DT.rows.forEach(function(r){bset[biroLabel(r)]=true});
-  var blist=Object.keys(bset).sort(function(a,b){return a.localeCompare(b,'id')});
-  $('dlgBiro').innerHTML='<option value="">Semua Biro Jasa</option>'+blist.map(function(x){return '<option value="'+esc(x)+'">'+esc(x)+'</option>'}).join('');
+  var bcnt={}; DT.rows.forEach(function(r){var b=biroLabel(r); bcnt[b]=(bcnt[b]||0)+1});
+  var blist=Object.keys(bcnt).sort(function(a,b){return bcnt[b]-bcnt[a]});
+  $('dlgBiro').innerHTML='<option value="">Semua biro jasa ('+fmt(DT.rows.length)+')</option>'+blist.map(function(x){return '<option value="'+esc(x)+'">'+esc(x)+' ('+fmt(bcnt[x])+')</option>'}).join('');
   $('dlgBiro').value='';
   var d=$('dlg'); if(typeof d.showModal==='function'){ if(!d.open) d.showModal() } else d.setAttribute('open','');
   renderDetail();
