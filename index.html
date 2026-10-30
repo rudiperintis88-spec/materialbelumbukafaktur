@@ -319,6 +319,7 @@ dialog::backdrop{background:rgba(10,16,24,.55)}
   </div>
   <div class="tools">
     <input type="search" id="dlgQ" placeholder="Cari nama, no polisi, type, salesman, supervisor, biro jasa" aria-label="Cari di detail">
+    <select id="dlgBiro" aria-label="Filter biro jasa"><option value="">Semua Biro Jasa</option></select>
     <button class="btn pri" id="dlgXls" type="button">Export Excel</button>
   </div>
   <div class="scroll" id="dlgScroll" tabindex="0" role="region" aria-label="Tabel detail, geser dengan tombol panah kiri dan kanan" style="max-height:58vh"><table class="data" id="dlgTbl"></table></div>
@@ -682,7 +683,7 @@ function divByName(n){return divisions.filter(function(d){return d.cfg.name===n}
 
 /* ====== Detail (dialog) ====== */
 var DBASE=[['No',I.no,'nw','seq'],['STNK a/n',I.nama,'','txt'],['Type',I.type,'type','txt'],['NoRangka',I.chassis,'','txt'],['No. Bast',I.bast,'','txt'],['No Polisi',I.polisi,'','txt'],['Tgl Mohon STNK',I.mohon,'dt','date'],['Terima Tanggal STNK',I.terima,'dt','date'],['Serah Tanggal STNK',I.serah,'dt','date'],['BPKB Terima Tanggal',I.bpkb,'dt','date'],['BPKB Serah Tanggal',I.bserah,'dt','date'],['Mohon ke Terima STNK (hari)',I.l1,'n','num'],['STNK ke Terima BPKB (hari)',I.l2,'n','num'],['Terima ke Serah STNK (hari)',I.l3,'n','num'],['Terima ke Serah BPKB (hari)',I.l4,'n','num'],['Umur belum BPKB (hari)',I.age,'n','num'],['Biro Jasa',I.biro,'','txt'],['Leasing',I.leasing,'','txt'],['Salesman',I.sales,'','txt'],['Supervisor',I.spv,'','txt'],['Keterangan',I.ket,'ket','txt']];
-var DT={rows:[],cols:[],q:'',page:1,ps:50,sortCol:null,sortDir:null,title:'',scope:'*'};
+var DT={rows:[],cols:[],q:'',biro:'',page:1,ps:50,sortCol:null,sortDir:null,title:'',scope:'*'};
 function bi(v,edges){var i=0;while(i<edges.length&&v>edges[i])i++;return i}
 function lpPred(key,biro){
   var m=key.match(/^(b1|b2|age):(\d+)$/);
@@ -754,12 +755,17 @@ function openDetail(key,scope,biro){
   else if(key==='cnt3'){DT.sortCol=ci(I.l3);DT.sortDir='desc'}
   else if(key==='cnt4'){DT.sortCol=ci(I.l4);DT.sortDir='desc'}
   else if(/^b2:|^cnt2$/.test(key)){DT.sortCol=ci(I.l2);DT.sortDir='desc'}
-  $('dlgQ').value='';
+  $('dlgQ').value=''; DT.biro='';
+  var bset={}; DT.rows.forEach(function(r){bset[biroLabel(r)]=true});
+  var blist=Object.keys(bset).sort(function(a,b){return a.localeCompare(b,'id')});
+  $('dlgBiro').innerHTML='<option value="">Semua Biro Jasa</option>'+blist.map(function(x){return '<option value="'+esc(x)+'">'+esc(x)+'</option>'}).join('');
+  $('dlgBiro').value='';
   var d=$('dlg'); if(typeof d.showModal==='function'){ if(!d.open) d.showModal() } else d.setAttribute('open','');
   renderDetail();
 }
 function detailRows(){
   var q=DT.q.trim().toLowerCase(), rows=DT.rows;
+  if(DT.biro) rows=rows.filter(function(r){return biroLabel(r)===DT.biro});
   if(q) rows=rows.filter(function(r){return [r[I.nama],r[I.type],r[I.chassis],r[I.bast],r[I.polisi],r[I.sales],r[I.spv],r[I.biro],r[I.leasing],r[I.ket],r[I.div],r[I.via],r[I.resi]].join(' ').toLowerCase().indexOf(q)>=0});
   return DT.sortCol===null?rows:sortRows(rows,DT.cols[DT.sortCol],DT.sortDir);
 }
@@ -1335,6 +1341,7 @@ document.addEventListener('click',function(e){
 $('dlgX').addEventListener('click',function(){$('dlg').close()});
 $('dlg').addEventListener('click',function(e){if(e.target===$('dlg')) $('dlg').close()});
 $('dlgQ').addEventListener('input',function(e){DT.q=e.target.value;DT.page=1;renderDetail()});
+$('dlgBiro').addEventListener('change',function(e){DT.biro=e.target.value;DT.page=1;renderDetail()});
 $('dlgPrev').addEventListener('click',function(){DT.page--;renderDetail()});
 $('dlgNext').addEventListener('click',function(){DT.page++;renderDetail()});
 $('dlgTbl').addEventListener('click',function(e){
@@ -1656,6 +1663,7 @@ dialog::backdrop{background:rgba(10,16,24,.55)}
   </div>
   <div class="tools">
     <input type="search" id="dlgQ" placeholder="Cari nama, no polisi, no bast, type, no rangka, salesman, supervisor, leasing" aria-label="Cari di detail">
+    <select id="dlgBiro" aria-label="Filter biro jasa"><option value="">Semua Biro Jasa</option></select>
     <button class="btn pri" id="dlgXls" type="button">Export Excel</button>
   </div>
   <div class="scroll" id="dlgScroll" tabindex="0" role="region" aria-label="Tabel detail, geser dengan tombol panah kiri dan kanan" style="max-height:58vh"><table class="data" id="dlgTbl"></table></div>
@@ -2263,7 +2271,7 @@ function divByName(n){return divisions.filter(function(d){return d.cfg.name===n}
 function allRows(){var a=[];divisions.forEach(function(d){a=a.concat(d.rows)});return a}
 
 /* ====== Detail (dialog) ====== */
-var DT={rows:[],cols:[],q:'',page:1,ps:50,sortCol:null,sortDir:null,title:'',scope:'*'};
+var DT={rows:[],cols:[],q:'',biro:'',page:1,ps:50,sortCol:null,sortDir:null,title:'',scope:'*'};
 function dBtn(n,scope,k,lea){
   if(!n) return '0';
   return '<button type="button" class="rowbtn" data-dk="'+esc(k)+'" data-dv="'+esc(scope)+'"'+(lea!=null?' data-dl="'+esc(lea)+'"':'')+' title="Klik untuk melihat detail unit">'+fmt(n)+'</button>';
@@ -2276,12 +2284,17 @@ function openDetail(k,scope,lea){
   DT.scopeLabel=(scope==='*'?'Semua divisi':'Divisi '+scope);
   DT.cols=(scope==='*'?[['Divisi',I.div,'','txt']]:[]).concat(COLS); DT.colW=colWidths(DT.rows,DT.cols);
   DT.sortCol=null; DT.sortDir=null;
-  $('dlgQ').value='';
+  $('dlgQ').value=''; DT.biro='';
+  var bset={}; DT.rows.forEach(function(r){bset[biroLabel(r)]=true});
+  var blist=Object.keys(bset).sort(function(a,b){return a.localeCompare(b,'id')});
+  $('dlgBiro').innerHTML='<option value="">Semua Biro Jasa</option>'+blist.map(function(x){return '<option value="'+esc(x)+'">'+esc(x)+'</option>'}).join('');
+  $('dlgBiro').value='';
   var d=$('dlg'); if(typeof d.showModal==='function'){ if(!d.open) d.showModal() } else d.setAttribute('open','');
   renderDetail();
 }
 function detailRows(){
   var q=DT.q.trim().toLowerCase(), rows=DT.rows;
+  if(DT.biro) rows=rows.filter(function(r){return biroLabel(r)===DT.biro});
   if(q) rows=rows.filter(function(r){return [r[I.nama],r[I.type],r[I.chassis],r[I.bast],r[I.polisi],r[I.sales],r[I.spv],r[I.biro],r[I.leasing],r[I.surat],r[I.ket],r[I.alasan],r[I.div]].join(' ').toLowerCase().indexOf(q)>=0});
   return DT.sortCol===null?rows:sortRows(rows,DT.cols[DT.sortCol],DT.sortDir);
 }
@@ -2447,6 +2460,7 @@ document.addEventListener('click',function(e){
 $('dlgX').addEventListener('click',function(){$('dlg').close()});
 $('dlg').addEventListener('click',function(e){if(e.target===$('dlg')) $('dlg').close()});
 $('dlgQ').addEventListener('input',function(e){DT.q=e.target.value;DT.page=1;renderDetail()});
+$('dlgBiro').addEventListener('change',function(e){DT.biro=e.target.value;DT.page=1;renderDetail()});
 $('dlgPrev').addEventListener('click',function(){DT.page--;renderDetail()});
 $('dlgNext').addEventListener('click',function(){DT.page++;renderDetail()});
 $('dlgTbl').addEventListener('click',function(e){
